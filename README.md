@@ -51,37 +51,7 @@ The implementation also involved troubleshooting cloud resource limitations, con
 
 ## Architecture & Artifact Publishing Workflow
 
-```text
-                    LOCAL DEVELOPMENT ENVIRONMENT
-                    -----------------------------
-
-        Java Gradle Project        Java Maven Project
-                 |                         |
-                 v                         v
-           gradle build                mvn package
-                 |                         |
-                 v                         v
-             JAR Artifact             JAR Artifact
-                 |                         |
-           gradle publish                mvn deploy
-                 |                         |
-                 +------------+------------+
-                              |
-                              | HTTP artifact publishing
-                              | Repository URL + credentials
-                              v
-                  DIGITALOCEAN UBUNTU DROPLET
-                  ----------------------------
-
-                     Nexus Repository Manager
-                              |
-                              v
-                   Hosted Maven Repository
-                       maven-snapshots
-                              |
-                              v
-                    Published Java Artifacts
-```
+![Nexus Artifact Repository Architecture and Publishing Workflow](architecture/nexus-artifact-workflow.png)
 
 Nexus runs on the cloud server under a dedicated Linux service account. Gradle and Maven publish artifacts remotely using credentials belonging to a separate user configured within Nexus Repository Manager.
 
