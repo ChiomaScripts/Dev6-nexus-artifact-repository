@@ -2,6 +2,8 @@
 
 Provisioning and configuring Sonatype Nexus Repository Manager on a Linux cloud server, with artifact publishing workflows for Java applications built using Gradle and Maven.
 
+---
+
 ## Overview
 
 This project demonstrates the implementation of a centralised artifact repository using Sonatype Nexus Repository Manager on a DigitalOcean Ubuntu server.
@@ -9,6 +11,8 @@ This project demonstrates the implementation of a centralised artifact repositor
 The objective was to install and configure Nexus, establish appropriate service and repository-level access controls, and publish Java application artifacts from local development environments to a hosted Maven repository.
 
 The implementation also involved troubleshooting cloud resource limitations, configuring Linux filesystem permissions, understanding Nexus application and data storage, and integrating both Gradle and Maven with Nexus.
+
+---
 
 ## Tech Stack
 
@@ -23,6 +27,8 @@ The implementation also involved troubleshooting cloud resource limitations, con
 | SSH | Remote Linux server administration |
 | Linux users and permissions | Service isolation and filesystem access control |
 | DigitalOcean Cloud Firewall | Network access to the Nexus interface |
+
+---
 
 ## Implementation Scope
 
@@ -40,6 +46,8 @@ The implementation also involved troubleshooting cloud resource limitations, con
 - Created a Nexus repository user with artifact-publishing permissions.
 - Configured Gradle and Maven projects to publish artifacts to Nexus.
 - Verified published artifacts in the hosted `maven-snapshots` repository.
+
+---
 
 ## Architecture & Artifact Publishing Workflow
 
@@ -79,9 +87,9 @@ Nexus runs on the cloud server under a dedicated Linux service account. Gradle a
 
 ---
 
-## Implementation Walkthrough
+# Implementation Walkthrough
 
-### 1. Provision the Cloud Server
+### 01 — Provision the Cloud Server
 
 An Ubuntu Droplet was initially provisioned on DigitalOcean using a minimal configuration of 1 vCPU and 512 MB RAM to reduce infrastructure costs during the exercise.
 
@@ -93,7 +101,9 @@ The `/opt` directory was used to organise the third-party application installati
 
 **Outcome:** The initial Ubuntu server was provisioned and the Nexus installation files were downloaded and extracted.
 
-### 2. Investigate Resource Constraints and Resize the Droplet
+---
+
+### 02 — Investigate Resource Constraints and Resize the Droplet
 
 The initial 512 MB RAM configuration proved insufficient for the Nexus workload.
 
@@ -117,13 +127,15 @@ The Nexus installation occupied a substantial amount of disk space, while the se
 
 The Droplet was subsequently resized to **1 vCPU and 2 GB RAM**, providing more suitable resources for the learning exercise.
 
-**Evidence — Resource investigation and resizing**
+#### Deployment Evidence — Resource Investigation
 
 ![Initial resource limitations and resized Droplet](evidence/01-resource-troubleshooting.png)
 
 **Outcome:** The cloud environment was adjusted after identifying that the initial resource allocation was unsuitable for Nexus.
 
-### 3. Understand Nexus Application and Data Directories
+---
+
+### 03 — Understand Nexus Application and Data Directories
 
 After extracting the Nexus archive, two principal directories were identified:
 
@@ -143,7 +155,9 @@ The Nexus installation is configured to locate its work directory through the ap
 
 **Key learning:** Artifact repository management involves both the application runtime and persistent storage. Backups must protect the actual repository data, not merely the Nexus executable files.
 
-### 4. Install Java and Configure a Dedicated Linux Service Account
+---
+
+### 04 — Install Java and Configure a Dedicated Linux Service Account
 
 The required Java runtime was installed on the Ubuntu server.
 
@@ -157,13 +171,15 @@ Ownership of the Nexus application and work directories was then assigned to the
 
 The `chown` command was used recursively to ensure that the service user could access the necessary files and directories.
 
-**Evidence — Linux service user and directory ownership**
+#### Deployment Evidence — Linux Service User
 
 ![Nexus Linux user and directory ownership](evidence/02-linux-service-user.png)
 
 **Outcome:** Nexus application files and persistent data were configured for access by the dedicated Linux service account.
 
-### 5. Configure Nexus Runtime Identity
+---
+
+### 05 — Configure Nexus Runtime Identity
 
 The Nexus startup configuration was updated through the `nexus.rc` file inside the application's `bin` directory.
 
@@ -177,13 +193,15 @@ This setting controls the runtime identity used by the Nexus startup mechanism.
 
 It does not create the Linux account or independently assign filesystem permissions. Those operations must be performed separately.
 
-**Evidence — Nexus runtime configuration**
+#### Deployment Evidence — Nexus Runtime Configuration
 
 ![Nexus runtime user configuration](evidence/03-nexus-runtime-config.png)
 
 **Outcome:** The Nexus startup configuration was set to use the dedicated Linux service account.
 
-### 6. Start Nexus and Configure Administrative Access
+---
+
+### 06 — Start Nexus and Configure Administrative Access
 
 The Nexus application was started using its startup script.
 
@@ -203,13 +221,15 @@ The Nexus web interface was then accessed through a browser.
 
 During the initial setup, the automatically generated administrator password was retrieved from the server and replaced through the Nexus setup process.
 
-**Evidence — Nexus startup and web interface**
+#### Deployment Evidence — Nexus Startup and Web Interface
 
 ![Nexus service running and management interface](evidence/04-nexus-startup-ui.png)
 
 **Outcome:** Nexus Repository Manager was running on the cloud server and accessible through its management interface.
 
-### 7. Configure Nexus Repository Permissions
+---
+
+### 07 — Configure Nexus Repository Permissions
 
 A separate user was created within the Nexus web interface to publish Java artifacts.
 
@@ -221,13 +241,15 @@ A role named `nx-java` was created and assigned to the publishing user.
 
 This separated administrative access to Nexus from the credentials used by build tools to upload artifacts.
 
-**Evidence — Nexus repository user configuration**
+#### Deployment Evidence — Repository User Configuration
 
 ![Nexus application users and repository access](evidence/05-nexus-repository-user.png)
 
 **Outcome:** A Nexus application-level identity was available for authenticated artifact publishing.
 
-### 8. Publish a Java Artifact Using Gradle
+---
+
+### 08 — Publish a Java Artifact Using Gradle
 
 The Java Gradle application was cloned into the local development environment.
 
@@ -280,13 +302,15 @@ gradle publish
 
 The publishing task uploaded the configured artifact and Maven metadata to the Nexus hosted repository.
 
-**Evidence — Gradle publishing configuration and successful upload**
+#### Deployment Evidence — Gradle Artifact Publishing
 
 ![Gradle artifact publishing to Nexus](evidence/06-gradle-publishing.png)
 
 **Outcome:** The Gradle-built Java artifact was published successfully to Nexus and verified through the repository browser.
 
-### 9. Publish a Java Artifact Using Maven
+---
+
+### 09 — Publish a Java Artifact Using Maven
 
 A separate Java Maven application was cloned locally.
 
@@ -325,13 +349,15 @@ The artifact was then deployed using:
 mvn deploy
 ```
 
-**Evidence — Maven build and published artifact**
+#### Deployment Evidence — Maven Artifact Publishing
 
 ![Maven artifact deployment and Nexus repository verification](evidence/07-maven-publishing.png)
 
 **Outcome:** The Maven-built Java artifact was published successfully to Nexus.
 
-### 10. Verify Both Published Artifacts
+---
+
+### 10 — Verify Both Published Artifacts
 
 The Nexus repository browser was used to inspect the `maven-snapshots` hosted repository.
 
@@ -366,7 +392,7 @@ The Nexus service account operates on the Ubuntu server. The repository publishi
 
 ## Troubleshooting & Lessons Learned
 
-### 1. Cloud Resource Sizing
+### 01 — Cloud Resource Sizing
 
 **Issue:** The initial 512 MB RAM Droplet was inadequate for Nexus.
 
@@ -376,13 +402,17 @@ The Nexus service account operates on the Ubuntu server. The repository publishi
 
 **Learning:** Infrastructure cost optimisation must be balanced against the actual resource requirements of the application workload.
 
-### 2. Application Binaries vs Persistent Repository Data
+---
+
+### 02 — Application Binaries vs Persistent Repository Data
 
 **Learning:** Nexus application binaries and persistent repository data are stored separately.
 
 This distinction matters for application upgrades, backup planning, recovery and storage management.
 
-### 3. Linux Service Accounts vs Application-Level Accounts
+---
+
+### 03 — Linux Service Accounts vs Application-Level Accounts
 
 **Challenge:** Understanding why a Linux user and a Nexus UI user were both needed.
 
@@ -390,19 +420,25 @@ This distinction matters for application upgrades, backup planning, recovery and
 
 These identities operate at different layers.
 
-### 4. Gradle Artifact Publishing
+---
+
+### 04 — Gradle Artifact Publishing
 
 **Learning:** The `maven-publish` plugin provides Gradle publishing capabilities. The `publishing` configuration specifies the publication, target repository and authentication details.
 
 The `publish` task performs the publication.
 
-### 5. Maven Artifact Deployment
+---
+
+### 05 — Maven Artifact Deployment
 
 **Learning:** Maven uses project metadata and deployment configuration in `pom.xml` to identify the artifact and destination repository.
 
 The Maven Deploy Plugin performs deployment, while Maven settings provide credentials for the configured repository.
 
-### 6. Artifact Repositories vs Source Code Repositories
+---
+
+### 06 — Artifact Repositories vs Source Code Repositories
 
 **Learning:** Git repositories store and version source code, whereas Nexus stores packaged build outputs and associated metadata.
 
@@ -421,20 +457,25 @@ This project was performed in a temporary learning environment.
 - The demonstration used HTTP access to the Nexus endpoint. HTTPS and further network hardening would be required for a production deployment.
 - Exposing the Nexus management port publicly should be avoided in production unless access is appropriately restricted and protected.
 
+---
+
 ## Technical Focus
 
-**Cloud Infrastructure**
+### Cloud Infrastructure
+
 - Server provisioning and capacity adjustment
 - Resource troubleshooting
 - Cloud networking and firewall configuration
 
-**Linux Administration**
+### Linux Administration
+
 - Service account creation
 - Filesystem ownership and permissions
 - Application runtime configuration
 - Process and network-listening inspection
 
-**Artifact Management**
+### Artifact Management
+
 - Nexus installation and administration
 - Hosted Maven repositories
 - Repository users, roles and permissions
